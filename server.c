@@ -6,18 +6,12 @@
 /*   By: ysemlali <ysemlali@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/27 21:43:47 by ysemlali          #+#    #+#             */
-/*   Updated: 2023/12/28 11:35:30 by ysemlali         ###   ########.fr       */
+/*   Updated: 2023/12/29 21:32:46 by ysemlali         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "ft_printf.h"
 #include "libft.h"
 #include <signal.h>
-#include <stdlib.h>
-#include <unistd.h>
-
-char	g_binary[9];
-int		g_i = 0;
 
 char	binary_to_ascii(char *binary)
 {
@@ -35,20 +29,24 @@ char	binary_to_ascii(char *binary)
 	}
 	return (c);
 }
+
 void	handle_signal(int sig)
 {
-    char	c;
-    if (sig == SIGUSR1)
-        g_binary[g_i++] = '1'; 
-    else
-        g_binary[g_i++] = '0';
-    if (g_i == 8)
-    {
-        g_binary[g_i] = '\0';
-        c = binary_to_ascii(g_binary);
-        write(1, &c, 1);
-        g_i = 0;
-    }
+	char		c;
+	static int	i = 0;
+	static char	binary[9];
+
+	if (sig == SIGUSR1)
+		binary[i++] = '1';
+	else
+		binary[i++] = '0';
+	if (i == 8)
+	{
+		binary[i] = '\0';
+		c = binary_to_ascii(binary);
+		write(1, &c, 1);
+		i = 0;
+	}
 }
 
 int	main(void)
@@ -57,7 +55,7 @@ int	main(void)
 	int					sig1;
 	int					sig2;
 
-	ft_printf("Server PID: %d\n", getpid());
+	ft_printf("%d\n", getpid());
 	sa.sa_handler = handle_signal;
 	sigemptyset(&sa.sa_mask);
 	sa.sa_flags = 0;

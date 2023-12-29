@@ -6,17 +6,29 @@
 /*   By: ysemlali <ysemlali@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/27 19:00:48 by ysemlali          #+#    #+#             */
-/*   Updated: 2023/12/28 12:09:31 by ysemlali         ###   ########.fr       */
+/*   Updated: 2023/12/29 21:32:34 by ysemlali         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <signal.h>
-#include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
 #include "libft.h"
-#include "ft_printf.h"
+#include <signal.h>
+
+char	*ft_valid_pid(char *pid)
+{
+	int	i;
+
+	i = 0;
+	while (pid[i] != '\0')
+	{
+		if (pid[i] < '0' || pid[i] > '9')
+		{
+			write(1, "INVALID PID\n", 12);
+			exit(0);
+		}
+		i++;
+	}
+	return (pid);
+}
 
 char	*ascii_to_binary(int ascii)
 {
@@ -29,49 +41,56 @@ char	*ascii_to_binary(int ascii)
 		return (NULL);
 	while (i >= 0)
 	{
-		binary[7 - i] = ((ascii & (1 << i)) ? '1' : '0');
+		if (ascii & (1 << i))
+			binary[7 - i] = '1';
+		else
+			binary[7 - i] = '0';
 		i--;
 	}
 	binary[8] = '\0';
 	return (binary);
 }
 
+void	receive_signal(int pid, char *message)
+{
+	int		i;
+	char	*binary;
+	int		signal;
+	int		j;
+
+	i = 0;
+	while (message[i] != '\0')
+	{
+		binary = ascii_to_binary((int)message[i++]);
+		j = 0;
+		while (binary[j] != '\0')
+		{
+			signal = SIGUSR2;
+			if (binary[j] == '1')
+				signal = SIGUSR1;
+			if (kill(pid, signal) == -1)
+			{
+				write(1, "error", 5);
+				free(binary);
+				return ;
+			}
+			j++;
+			usleep(210);
+		}
+		free(binary);
+	}
+}
+
 int	main(int ac, char **av)
 {
-    char	*binary;
-    int		signal;
-    pid_t	pid;
-    int		i;
-    int		j;
+	pid_t	pid;
 
-    if (ac == 3)
-    {
-        pid = ft_atoi(av[1]);
-        printf("%d", pid);
-        j = 0;
-        while (av[2][j] != '\0')
-        {
-            binary = ascii_to_binary((int)av[2][j]);
-            i = 0;
-            while (binary[i] != '\0')
-            {
-                if (binary[i] == '1')
-                    signal = SIGUSR1;
-                else
-                    signal = SIGUSR2;
-                if (kill(pid, signal) == -1)
-                {
-                    write(1, "Error sending signal", 20);
-                    free(binary);
-                    return (1);
-                }
-                usleep(210);
-                i++;
-            }
-            free(binary);
-            j++;
-        }
-    }
-    write(1, "\n", 1);
-    return (0);
+	if (ac == 3)
+	{
+		printf("%i", getuid());
+		pid = ft_atoi(ft_valid_pid(av[1]));
+		receive_signal(pid, av[2]);
+	}
+	write(1, "\n", 1);
+	return (0);
 }
