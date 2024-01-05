@@ -6,79 +6,51 @@
 /*   By: ysemlali <ysemlali@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/27 19:00:48 by ysemlali          #+#    #+#             */
-/*   Updated: 2023/12/29 21:32:34 by ysemlali         ###   ########.fr       */
+/*   Updated: 2024/01/05 22:55:48 by ysemlali         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libft.h"
 #include <signal.h>
+#include "ft_printf/ft_printf.h"
 
-char	*ft_valid_pid(char *pid)
+void	handle_signal(int sig)
+{
+	ft_printf("Signal received: %d\n", sig);
+	if (sig == SIGUSR2)
+	{
+		write(1, "message received\n", 17);
+		exit(0);
+	}
+	else
+	{
+		write(1, " not sigusr2\n", 13);
+		exit(1);
+	}
+}
+
+int	send_message(int pid, char *message)
 {
 	int	i;
+	int	signal;
 
-	i = 0;
-	while (pid[i] != '\0')
+	while (1)
 	{
-		if (pid[i] < '0' || pid[i] > '9')
-		{
-			write(1, "INVALID PID\n", 12);
-			exit(0);
-		}
-		i++;
-	}
-	return (pid);
-}
-
-char	*ascii_to_binary(int ascii)
-{
-	char	*binary;
-	int		i;
-
-	i = 7;
-	binary = malloc(9);
-	if (!binary)
-		return (NULL);
-	while (i >= 0)
-	{
-		if (ascii & (1 << i))
-			binary[7 - i] = '1';
-		else
-			binary[7 - i] = '0';
-		i--;
-	}
-	binary[8] = '\0';
-	return (binary);
-}
-
-void	receive_signal(int pid, char *message)
-{
-	int		i;
-	char	*binary;
-	int		signal;
-	int		j;
-
-	i = 0;
-	while (message[i] != '\0')
-	{
-		binary = ascii_to_binary((int)message[i++]);
-		j = 0;
-		while (binary[j] != '\0')
+		i = 7;
+		while (i >= 0)
 		{
 			signal = SIGUSR2;
-			if (binary[j] == '1')
+			if (((int)*message) & (1 << i))
 				signal = SIGUSR1;
 			if (kill(pid, signal) == -1)
-			{
-				write(1, "error", 5);
-				free(binary);
-				return ;
-			}
-			j++;
-			usleep(210);
+				return (1);
+			i--;
+			usleep(200);
 		}
-		free(binary);
+		if (*message == '\0')
+			break ;
+		message++;
 	}
+	return (0);
 }
 
 int	main(int ac, char **av)
@@ -87,9 +59,12 @@ int	main(int ac, char **av)
 
 	if (ac == 3)
 	{
-		printf("%i", getuid());
-		pid = ft_atoi(ft_valid_pid(av[1]));
-		receive_signal(pid, av[2]);
+		pid = ft_atoi(av[1]);
+		signal(SIGUSR2, handle_signal);
+		if (send_message(pid, av[2]))
+			write(1, "ERROR\n", 6);
+		while (1)
+			pause();
 	}
 	write(1, "\n", 1);
 	return (0);
