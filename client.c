@@ -6,26 +6,18 @@
 /*   By: ysemlali <ysemlali@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/27 19:00:48 by ysemlali          #+#    #+#             */
-/*   Updated: 2024/01/05 22:55:48 by ysemlali         ###   ########.fr       */
+/*   Updated: 2024/01/07 00:19:32 by ysemlali         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <signal.h>
 #include "ft_printf/ft_printf.h"
+
 
 void	handle_signal(int sig)
 {
-	ft_printf("Signal received: %d\n", sig);
 	if (sig == SIGUSR2)
-	{
-		write(1, "message received\n", 17);
-		exit(0);
-	}
-	else
-	{
-		write(1, " not sigusr2\n", 13);
-		exit(1);
-	}
+		ft_printf("Message received\n");
+	exit(0);
 }
 
 int	send_message(int pid, char *message)
@@ -60,9 +52,17 @@ int	main(int ac, char **av)
 	if (ac == 3)
 	{
 		pid = ft_atoi(av[1]);
+		if (pid <= 0)
+		{
+			ft_printf("PID ERROR\n");
+			return (0);
+		}
 		signal(SIGUSR2, handle_signal);
 		if (send_message(pid, av[2]))
-			write(1, "ERROR\n", 6);
+		{
+			ft_printf("Error sending to pid %d\n", pid);
+			exit(0);
+		}
 		while (1)
 			pause();
 	}

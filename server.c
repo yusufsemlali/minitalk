@@ -6,12 +6,12 @@
 /*   By: ysemlali <ysemlali@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/27 21:43:47 by ysemlali          #+#    #+#             */
-/*   Updated: 2024/01/05 22:55:46 by ysemlali         ###   ########.fr       */
+/*   Updated: 2024/01/06 16:53:03 by ysemlali         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <signal.h>
 #include "ft_printf/ft_printf.h"
+
 
 void	handle_signal(int sig, siginfo_t *siginfo, void *context)
 {
@@ -21,8 +21,6 @@ void	handle_signal(int sig, siginfo_t *siginfo, void *context)
 
 	(void)context;
 	pid = siginfo->si_pid;
-	if (i == 0)
-		c = 0;
 	c <<= 1;
 	if (sig == SIGUSR1)
 		c |= 1;
@@ -46,11 +44,9 @@ int	main(void)
 
 	ft_printf("%d\n", getpid());
 	sa.sa_sigaction = handle_signal;
-	sigemptyset(&sa.sa_mask);
 	sa.sa_flags = SA_SIGINFO;
 	if (sigaction(SIGUSR1, &sa, NULL) == -1)
 		ft_printf("Error\n");
-	sigaction(SIGTERM, &sa, NULL);
 	if (sigaction(SIGUSR2, &sa, NULL) == -1)
 		ft_printf("Error\n");
 	while (1)

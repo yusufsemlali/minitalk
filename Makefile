@@ -1,5 +1,5 @@
 CC = cc
-CF = -Wall -Wextra -Werror
+FLAGS = -Wall -Wextra -Werror
 SRV = server
 CLI = client
 SERVER_SRC = server.c
@@ -12,17 +12,16 @@ LIBS = -L. -lftprintf
 all: $(FTPF_NAME) $(SRV) $(CLI)
 
 $(FTPF_NAME): $(FTPF_OBJ)
-	@ar rc $(FTPF_NAME) $(FTPF_OBJ)
-	@ranlib $(FTPF_NAME)
+	@ar rc $(FTPF_NAME) $(FTPF_OBJ) 
 
 $(CLI): $(FTPF_NAME)
-	@$(CC) $(CF) $(CLIENT_SRC) $(LIBS) -o $(CLI)
+	@$(CC) $(FLAGS) $(CLIENT_SRC) $(LIBS) -o $(CLI)
 
 $(SRV): $(FTPF_NAME)
-	@$(CC) $(CF) $(SERVER_SRC) $(LIBS) -o $(SRV)
+	@$(CC) $(FLAGS) $(SERVER_SRC) $(LIBS) -o $(SRV)
 
 %.o: %.c
-	@$(CC) $(CF) -c $< -o $@
+	@$(CC) $(FLAGS) -c $< -o $@
 
 clean:
 	@rm -f $(FTPF_OBJ) $(SRV) $(CLI)

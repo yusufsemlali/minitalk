@@ -6,7 +6,7 @@
 /*   By: ysemlali <ysemlali@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/25 12:41:28 by ysemlali          #+#    #+#             */
-/*   Updated: 2024/01/05 22:18:57 by ysemlali         ###   ########.fr       */
+/*   Updated: 2024/01/06 16:44:25 by ysemlali         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,9 +15,9 @@
 
 # include <limits.h>
 # include <stdarg.h>
-# include <stdio.h>
 # include <stdlib.h>
 # include <unistd.h>
+# include <signal.h>
 
 int	ft_printf(const char *input, ...);
 int	ft_parse(const char *input, va_list args);
